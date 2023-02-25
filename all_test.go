@@ -41,7 +41,7 @@ func Test_AesCBC128(t *testing.T) {
 	
 }
 
-func Test_AESKey_256(t *testing.T) {
+func Test_AesCBCKey_256(t *testing.T) {
 	log.Println("test--aec--cbc256")
 	var k = New_AESKey_256([]byte("--==key"))
 	fmt.Println("key ", len(k),k)
