@@ -1,6 +1,5 @@
 package go_encdecryption
 
-
 import (
 	"bytes"
 	"crypto/des"
@@ -29,7 +28,7 @@ func DesEncrypt(src, key []byte) ([]byte, error) {
 	return out, nil
 }
 
-func DesDecrypt(src , key []byte) ([]byte, error) {
+func DesDecrypt(src, key []byte) ([]byte, error) {
 	block, err := des.NewCipher(key)
 	if err != nil {
 		return nil, err

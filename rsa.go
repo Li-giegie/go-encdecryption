@@ -9,7 +9,7 @@ import (
 )
 
 // 加密
-func RsaEncrypt(origData,publicKey []byte,) ([]byte, error) {
+func RsaEncrypt(origData, publicKey []byte) ([]byte, error) {
 	//解密pem格式的公钥
 	block, _ := pem.Decode(publicKey)
 	if block == nil {
@@ -27,7 +27,7 @@ func RsaEncrypt(origData,publicKey []byte,) ([]byte, error) {
 }
 
 // 解密
-func RsaDecrypt(ciphertext,privateKey []byte) ([]byte, error) {
+func RsaDecrypt(ciphertext, privateKey []byte) ([]byte, error) {
 	//解密
 	block, _ := pem.Decode(privateKey)
 	if block == nil {
@@ -41,4 +41,3 @@ func RsaDecrypt(ciphertext,privateKey []byte) ([]byte, error) {
 	// 解密
 	return rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 }
-

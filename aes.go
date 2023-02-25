@@ -1,16 +1,17 @@
 package go_encdecryption
 
 import (
-"bytes"
-"crypto/aes"
-"crypto/cipher"
-"crypto/rand"
-"errors"
-"fmt"
-"io"
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"errors"
+	"fmt"
+	"io"
 )
+
 // 加密
-func AesEncryptECB(src []byte, key Key) ([]byte,error ) {
+func AesEncryptECB(src []byte, key Key) ([]byte, error) {
 	_cipher, err := aes.NewCipher(generateKey(key))
 	if err != nil {
 		return nil, err
@@ -28,10 +29,11 @@ func AesEncryptECB(src []byte, key Key) ([]byte,error ) {
 		_cipher.Encrypt(encrypted[bs:be], plain[bs:be])
 	}
 
-	return encrypted,nil
+	return encrypted, nil
 }
+
 // 解密
-func AesDecryptECB(encrypted []byte, key Key) ([]byte,error) {
+func AesDecryptECB(encrypted []byte, key Key) ([]byte, error) {
 	_cipher, err := aes.NewCipher(generateKey(key))
 	if err != nil {
 		return nil, err
@@ -51,7 +53,7 @@ func AesDecryptECB(encrypted []byte, key Key) ([]byte,error) {
 		return nil, errors.New("key error")
 	}
 
-	return decrypted[:trim],nil
+	return decrypted[:trim], nil
 }
 
 func generateKey(key []byte) (genKey []byte) {
@@ -65,7 +67,7 @@ func generateKey(key []byte) (genKey []byte) {
 	return genKey
 }
 
-func AesEncryptCBC(orig []byte,key Key) ([]byte,error) {
+func AesEncryptCBC(orig []byte, key Key) ([]byte, error) {
 
 	// 分组秘钥
 	// NewCipher该函数限制了输入k的长度必须为16, 24或者32
@@ -83,9 +85,9 @@ func AesEncryptCBC(orig []byte,key Key) ([]byte,error) {
 	cryted := make([]byte, len(orig))
 	// 加密
 	blockMode.CryptBlocks(cryted, orig)
-	return cryted,nil
+	return cryted, nil
 }
-func AesDecryptCBC(cryted []byte, key Key) ([]byte,error) {
+func AesDecryptCBC(cryted []byte, key Key) ([]byte, error) {
 	var err error
 	// 分组秘钥
 	block, err := aes.NewCipher(key)
@@ -101,12 +103,12 @@ func AesDecryptCBC(cryted []byte, key Key) ([]byte,error) {
 	// 解密
 	blockMode.CryptBlocks(orig, cryted)
 	// 去补全码
-	orig,err = PKCS7UnPadding(orig)
+	orig, err = PKCS7UnPadding(orig)
 
-	return orig,err
+	return orig, err
 }
 
-//加密、解密使用同一个函数
+// 加密、解密使用同一个函数
 func AesCtrCrypt(plainText []byte, key Key) ([]byte, error) {
 
 	//1. 创建cipher.Block接口
@@ -138,7 +140,7 @@ func AesEncryptCFB(origData []byte, key Key) ([]byte, error) {
 	}
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(encrypted[aes.BlockSize:], origData)
-	return encrypted,nil
+	return encrypted, nil
 }
 func AesDecryptCFB(encrypted []byte, key Key) ([]byte, error) {
 	block, err := aes.NewCipher(key)
@@ -146,23 +148,23 @@ func AesDecryptCFB(encrypted []byte, key Key) ([]byte, error) {
 		return nil, err
 	}
 	if len(encrypted) < aes.BlockSize {
-		return nil,errors.New(("ciphertext too short"))
+		return nil, errors.New(("ciphertext too short"))
 	}
 	iv := encrypted[:aes.BlockSize]
 	encrypted = encrypted[aes.BlockSize:]
 
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(encrypted, encrypted)
-	return encrypted,nil
+	return encrypted, nil
 }
 
-func AesEncryptOFB( data[]byte,key Key) ([]byte, error) {
+func AesEncryptOFB(data []byte, key Key) ([]byte, error) {
 	data = PKCS7Padding(data, aes.BlockSize)
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	out := make([]byte, aes.BlockSize + len(data))
+	out := make([]byte, aes.BlockSize+len(data))
 	iv := out[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
@@ -172,15 +174,15 @@ func AesEncryptOFB( data[]byte,key Key) ([]byte, error) {
 	stream.XORKeyStream(out[aes.BlockSize:], data)
 	return out, nil
 }
-func AesDecryptOFB( data[]byte,key Key) ([]byte, error) {
+func AesDecryptOFB(data []byte, key Key) ([]byte, error) {
 	var err error
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	iv  := data[:aes.BlockSize]
+	iv := data[:aes.BlockSize]
 	data = data[aes.BlockSize:]
-	if len(data) % aes.BlockSize != 0 {
+	if len(data)%aes.BlockSize != 0 {
 		return nil, fmt.Errorf("data is not a multiple of the block size")
 	}
 
@@ -188,31 +190,31 @@ func AesDecryptOFB( data[]byte,key Key) ([]byte, error) {
 	mode := cipher.NewOFB(block, iv)
 	mode.XORKeyStream(out, data)
 
-	out,err = PKCS7UnPadding(out)
+	out, err = PKCS7UnPadding(out)
 
 	return out, err
 }
 
-//补码
-//AES加密数据块分组长度必须为128bit(byte[16])，密钥长度可以是128bit(byte[16])、192bit(byte[24])、256bit(byte[32])中的任意一个。
+// 补码
+// AES加密数据块分组长度必须为128bit(byte[16])，密钥长度可以是128bit(byte[16])、192bit(byte[24])、256bit(byte[32])中的任意一个。
 func PKCS7Padding(ciphertext []byte, blocksize int) []byte {
 	padding := blocksize - len(ciphertext)%blocksize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
-//去码
-func PKCS7UnPadding(origData []byte) ([]byte,error) {
+
+// 去码
+func PKCS7UnPadding(origData []byte) ([]byte, error) {
 
 	length := len(origData)
 	if length == 0 {
-		return nil,errors.New("key error")
+		return nil, errors.New("key error")
 	}
 	unpadding := int(origData[length-1])
 
 	tmpL := length - unpadding
 	if tmpL <= 0 {
-		return nil,errors.New("key error")
+		return nil, errors.New("key error")
 	}
-	return origData[:tmpL],nil
+	return origData[:tmpL], nil
 }
-
