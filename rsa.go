@@ -8,6 +8,32 @@ import (
 	"errors"
 )
 
+//RSA公钥私钥产生
+func GenRsaKey(bitSize int) (prvkey, pubkey []byte,err error) {
+	// 生成私钥文件
+	privateKey, err := rsa.GenerateKey(rand.Reader, bitSize)
+	if err != nil {
+		return nil, nil, err
+	}
+	derStream := x509.MarshalPKCS1PrivateKey(privateKey)
+	block := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: derStream,
+	}
+	prvkey = pem.EncodeToMemory(block)
+	publicKey := &privateKey.PublicKey
+	derPkix, err := x509.MarshalPKIXPublicKey(publicKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	block = &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: derPkix,
+	}
+	pubkey = pem.EncodeToMemory(block)
+	return
+}
+
 // 加密
 func RsaEncrypt(origData, publicKey []byte) ([]byte, error) {
 	//解密pem格式的公钥

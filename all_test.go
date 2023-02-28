@@ -311,3 +311,19 @@ func TestNew_DESKey_64(t *testing.T) {
 	fmt.Println(len(New_DESKey_64([]byte("12345678"))))
 	fmt.Println(len(New_DESKey_64([]byte("123456789"))))
 }
+
+func Test_GenRsaKey(t *testing.T) {
+	pr,pu,err := GenRsaKey(256)
+	fmt.Println(len(pr), len(pu),err)
+}
+
+func Test_Rsa(t *testing.T) {
+	pr,pu,err := GenRsaKey(1024)
+	fmt.Println(len(pr), len(pu),err)
+
+	en,err := RsaEncrypt([]byte("hello word !"),pu)
+	fmt.Println("RsaEncrypt ",string(en),err)
+
+	de,err := RsaDecrypt(en,pr)
+	fmt.Println("RsaDecrypt ",string(de),err)
+}
